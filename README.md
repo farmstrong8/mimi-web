@@ -38,7 +38,7 @@ A playful and interactive e-commerce experience. Built with modern web technolog
 ### Design & Development Tools
 
 -   <a href="https://figma.com"><img src="https://static.figma.com/app/icon/1/favicon.ico" alt="Figma" width="16" height="16"> Figma</a>
--   <a href="https://specifyapp.com"><img src="https://framerusercontent.com/images/28f0JwyNuglEdmfYsJPzFFn2crY.png" alt="Specify" width="16" height="16"> Specify</a>
+-   <a href="https://styledictionary.com"><img src="https://styledictionary.com/favicon.png" alt="Style Dictionary" width="16" height="16"> Style Dictionary</a>
 
 ## 📝 License
 

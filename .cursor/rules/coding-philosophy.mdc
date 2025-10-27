@@ -1,0 +1,417 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules: A Philosophy of Software Design
+
+# Based on principles from John Ousterhout's "A Philosophy of Software Design"
+
+## Core Philosophy
+
+-   The primary goal is to minimize complexity and create systems that are easy to understand and modify
+-   Complexity is incremental - fight it continuously, not just during refactoring
+-   Working code isn't enough - strive for code that is obvious and maintainable
+-   Adopt STRATEGIC PROGRAMMING: invest time upfront in good design rather than tactical "just get it working" approaches
+
+## Deep Modules Principle
+
+-   Create modules with simple interfaces that hide complex implementations
+-   The best modules are those that provide powerful functionality through simple interfaces
+-   Interface should be much simpler than implementation
+-   Aim for a high benefit-to-cost ratio: maximize functionality while minimizing interface complexity
+-   Avoid shallow modules - modules where the interface is nearly as complex as the implementation
+
+## Information Hiding & Abstraction
+
+-   Each module should encapsulate knowledge that other modules don't need
+-   Hide implementation details, temporal decomposition, and complexity behind clean interfaces
+-   Reduce information leakage between modules
+-   Different layers should have different abstractions - avoid pass-through methods and variables
+-   Avoid exposing internal data structures in APIs
+
+## Managing Complexity
+
+-   Complexity manifests as: change amplification (simple changes require modifications in many places), cognitive load (how much you need to know to make a change), and unknown unknowns (it's unclear what needs to be modified)
+-   Pull complexity downward: it's better to add complexity in module implementation than to expose it in the interface
+-   Make the common case simple, even if it makes edge cases slightly more complex
+-   Avoid special cases in interfaces - generalize when reasonable
+
+## Comments & Documentation
+
+-   Comments are critical and should be maintained with the same rigor as code
+-   Write comments FIRST (before implementation) to solidify design thinking
+-   Comments should describe things that aren't obvious from code: what the code does (high-level), why it does it, constraints, edge cases
+-   Don't repeat the code in comments - add information
+-   Interface comments should describe WHAT without revealing HOW
+-   Implementation comments explain HOW and WHY specific approaches were chosen
+-   Cross-module comments should be at higher abstraction levels
+-   Avoid obvious comments that just restate the code
+
+## Naming Conventions
+
+-   Names should be precise and unambiguous
+-   Longer names for broader scope; shorter names acceptable for very narrow scope
+-   Names should convey meaning, not just implementation details
+-   If you can't find a good name, it's often a sign of poor design
+-   Be consistent in naming across the codebase
+-   Avoid vague names like "data", "info", "manager", "helper" without context
+
+## Red Flags to Avoid
+
+### Shallow Module
+
+-   Module interface is nearly as complex as its implementation
+-   Fix: Merge with caller, split into separate concerns, or add more functionality
+
+### Information Leakage
+
+-   Design decision is reflected in multiple modules
+-   Changes to one module require coordinated changes to others
+-   Fix: Pull the shared knowledge into a single module
+
+### Temporal Decomposition
+
+-   Code structure reflects order of operations rather than information hiding
+-   Fix: Organize around knowledge and responsibilities, not execution order
+
+### Overexposure
+
+-   API exposes implementation details that users shouldn't need to know
+-   Fix: Hide more, expose less - rethink the abstraction
+
+### Pass-Through Methods/Variables
+
+-   Method/variable does nothing except pass values between other modules
+-   Indicates missing functionality at intermediate layers
+-   Fix: Add functionality, eliminate the layer, or merge layers
+
+### Repetition
+
+-   Same code/pattern/knowledge appears in multiple places
+-   Fix: Create shared utility, abstraction, or module
+
+### Special-General Mixture
+
+-   Special-purpose code intermingled with general-purpose code
+-   Fix: Separate clearly or make the general-purpose code general enough to handle special cases
+
+### Conjoined Methods
+
+-   Two methods that must always be called together
+-   Fix: Merge into single method or create a coordinating method
+
+### Comment Repeats Code
+
+-   Comment says exactly what code does without adding information
+-   Fix: Remove comment or add useful information (why, constraints, context)
+
+### Hard to Pick Name
+
+-   Struggling to name a variable/method/class
+-   Usually indicates unclear purpose or mixed responsibilities
+-   Fix: Rethink the design to clarify purpose
+
+### Hard to Describe
+
+-   Can't write a simple comment describing what something does
+-   Indicates the module/method is doing too much or has unclear purpose
+-   Fix: Simplify or split responsibilities
+
+## Design Principles
+
+### Define Errors Out of Existence
+
+-   Reduce special-case handling by defining semantics that eliminate certain error conditions
+-   Example: unset variable could return empty string rather than requiring null checks
+-   When errors must exist, aggregate handling rather than scatter it
+
+### Design it Twice
+
+-   Always consider multiple design approaches before implementing
+-   Compare alternatives objectively
+-   The right design often emerges from comparison
+
+### Layer Design
+
+-   Each layer should offer a different abstraction than layers above/below
+-   Pass-through layers indicate problems
+-   Avoid too many shallow layers
+
+### Together or Apart?
+
+-   Should pieces be together or separate?
+-   Together if: they share information, they're used together, they overlap conceptually, it's hard to understand one without the other
+-   Apart if: they can be understood independently, they have different abstractions
+
+### Consistency
+
+-   Similar things should be done in similar ways
+-   Consistency reduces cognitive load
+-   Establish conventions and follow them
+-   Use consistent naming, coding patterns, and design patterns
+
+## Coding Standards
+
+### General-Purpose vs Special-Purpose
+
+-   Make modules somewhat general-purpose - avoid overly specialized modules
+-   General-purpose interfaces are simpler and reduce special cases
+-   Don't take it too far - avoid bloated "Swiss Army knife" modules
+
+### Code Obviousness
+
+-   Code should be obvious: a reader can quickly understand what it does and be confident there are no hidden bugs
+-   Non-obvious code requires more cognitive effort and is more bug-prone
+-   Use clear structure, good names, and consistency to make code obvious
+-   When code can't be obvious, explain it with comments
+
+### Software Trends to Approach Carefully
+
+-   **Agile/Test-Driven Development**: Don't let tactical thinking dominate - still invest in design
+-   **Microservices**: Can add complexity through many shallow interfaces - ensure each service is deep
+-   **Getters and Setters**: Often expose internals unnecessarily - prefer fewer, more meaningful operations
+
+### Error Handling
+
+-   Define errors out of existence when possible
+-   Aggregate error handling rather than scattering it
+-   Mask exceptions at module boundaries when appropriate
+-   Throw exceptions upward for serious errors; handle locally when reasonable
+
+## Modification Philosophy
+
+-   When modifying code, leave it better than you found it (strategic mindset)
+-   If you make a quick tactical fix, immediately follow with strategic cleanup
+-   Don't let complexity accumulate - address it when you encounter it
+-   Refactoring isn't a separate phase - it's continuous
+
+## Before You Code
+
+1. Think about the interface first - what's the simplest API that provides necessary functionality?
+2. Write interface comments defining behavior
+3. Consider at least two different design approaches
+4. Choose the design that minimizes complexity and maximizes maintainability
+5. Only then implement
+
+## Questions to Ask During Code Review
+
+-   Is this module deep or shallow?
+-   What information is hidden? What's exposed?
+-   Is this the right interface, or does it leak implementation details?
+-   Are comments adding information beyond the code?
+-   Is the naming clear and consistent?
+-   Is this code obvious? If not, why not?
+-   Could this be simpler?
+-   Does this add cognitive load unnecessarily?
+-   Are there red flags present?
+
+---
+
+Remember: Complexity is the enemy. Every line of code, every interface decision, every abstraction should be evaluated through the lens of "does this reduce or increase overall system complexity?"
+
+# Cursor Rules: A Philosophy of Software Design
+
+# Based on principles from John Ousterhout's "A Philosophy of Software Design"
+
+## Core Philosophy
+
+-   The primary goal is to minimize complexity and create systems that are easy to understand and modify
+-   Complexity is incremental - fight it continuously, not just during refactoring
+-   Working code isn't enough - strive for code that is obvious and maintainable
+-   Adopt STRATEGIC PROGRAMMING: invest time upfront in good design rather than tactical "just get it working" approaches
+
+## Deep Modules Principle
+
+-   Create modules with simple interfaces that hide complex implementations
+-   The best modules are those that provide powerful functionality through simple interfaces
+-   Interface should be much simpler than implementation
+-   Aim for a high benefit-to-cost ratio: maximize functionality while minimizing interface complexity
+-   Avoid shallow modules - modules where the interface is nearly as complex as the implementation
+
+## Information Hiding & Abstraction
+
+-   Each module should encapsulate knowledge that other modules don't need
+-   Hide implementation details, temporal decomposition, and complexity behind clean interfaces
+-   Reduce information leakage between modules
+-   Different layers should have different abstractions - avoid pass-through methods and variables
+-   Avoid exposing internal data structures in APIs
+
+## Managing Complexity
+
+-   Complexity manifests as: change amplification (simple changes require modifications in many places), cognitive load (how much you need to know to make a change), and unknown unknowns (it's unclear what needs to be modified)
+-   Pull complexity downward: it's better to add complexity in module implementation than to expose it in the interface
+-   Make the common case simple, even if it makes edge cases slightly more complex
+-   Avoid special cases in interfaces - generalize when reasonable
+
+## Comments & Documentation
+
+-   Comments are critical and should be maintained with the same rigor as code
+-   Write comments FIRST (before implementation) to solidify design thinking
+-   Comments should describe things that aren't obvious from code: what the code does (high-level), why it does it, constraints, edge cases
+-   Don't repeat the code in comments - add information
+-   Interface comments should describe WHAT without revealing HOW
+-   Implementation comments explain HOW and WHY specific approaches were chosen
+-   Cross-module comments should be at higher abstraction levels
+-   Avoid obvious comments that just restate the code
+
+## Naming Conventions
+
+-   Names should be precise and unambiguous
+-   Longer names for broader scope; shorter names acceptable for very narrow scope
+-   Names should convey meaning, not just implementation details
+-   If you can't find a good name, it's often a sign of poor design
+-   Be consistent in naming across the codebase
+-   Avoid vague names like "data", "info", "manager", "helper" without context
+
+## Red Flags to Avoid
+
+### Shallow Module
+
+-   Module interface is nearly as complex as its implementation
+-   Fix: Merge with caller, split into separate concerns, or add more functionality
+
+### Information Leakage
+
+-   Design decision is reflected in multiple modules
+-   Changes to one module require coordinated changes to others
+-   Fix: Pull the shared knowledge into a single module
+
+### Temporal Decomposition
+
+-   Code structure reflects order of operations rather than information hiding
+-   Fix: Organize around knowledge and responsibilities, not execution order
+
+### Overexposure
+
+-   API exposes implementation details that users shouldn't need to know
+-   Fix: Hide more, expose less - rethink the abstraction
+
+### Pass-Through Methods/Variables
+
+-   Method/variable does nothing except pass values between other modules
+-   Indicates missing functionality at intermediate layers
+-   Fix: Add functionality, eliminate the layer, or merge layers
+
+### Repetition
+
+-   Same code/pattern/knowledge appears in multiple places
+-   Fix: Create shared utility, abstraction, or module
+
+### Special-General Mixture
+
+-   Special-purpose code intermingled with general-purpose code
+-   Fix: Separate clearly or make the general-purpose code general enough to handle special cases
+
+### Conjoined Methods
+
+-   Two methods that must always be called together
+-   Fix: Merge into single method or create a coordinating method
+
+### Comment Repeats Code
+
+-   Comment says exactly what code does without adding information
+-   Fix: Remove comment or add useful information (why, constraints, context)
+
+### Hard to Pick Name
+
+-   Struggling to name a variable/method/class
+-   Usually indicates unclear purpose or mixed responsibilities
+-   Fix: Rethink the design to clarify purpose
+
+### Hard to Describe
+
+-   Can't write a simple comment describing what something does
+-   Indicates the module/method is doing too much or has unclear purpose
+-   Fix: Simplify or split responsibilities
+
+## Design Principles
+
+### Define Errors Out of Existence
+
+-   Reduce special-case handling by defining semantics that eliminate certain error conditions
+-   Example: unset variable could return empty string rather than requiring null checks
+-   When errors must exist, aggregate handling rather than scatter it
+
+### Design it Twice
+
+-   Always consider multiple design approaches before implementing
+-   Compare alternatives objectively
+-   The right design often emerges from comparison
+
+### Layer Design
+
+-   Each layer should offer a different abstraction than layers above/below
+-   Pass-through layers indicate problems
+-   Avoid too many shallow layers
+
+### Together or Apart?
+
+-   Should pieces be together or separate?
+-   Together if: they share information, they're used together, they overlap conceptually, it's hard to understand one without the other
+-   Apart if: they can be understood independently, they have different abstractions
+
+### Consistency
+
+-   Similar things should be done in similar ways
+-   Consistency reduces cognitive load
+-   Establish conventions and follow them
+-   Use consistent naming, coding patterns, and design patterns
+
+## Coding Standards
+
+### General-Purpose vs Special-Purpose
+
+-   Make modules somewhat general-purpose - avoid overly specialized modules
+-   General-purpose interfaces are simpler and reduce special cases
+-   Don't take it too far - avoid bloated "Swiss Army knife" modules
+
+### Code Obviousness
+
+-   Code should be obvious: a reader can quickly understand what it does and be confident there are no hidden bugs
+-   Non-obvious code requires more cognitive effort and is more bug-prone
+-   Use clear structure, good names, and consistency to make code obvious
+-   When code can't be obvious, explain it with comments
+
+### Software Trends to Approach Carefully
+
+-   **Agile/Test-Driven Development**: Don't let tactical thinking dominate - still invest in design
+-   **Microservices**: Can add complexity through many shallow interfaces - ensure each service is deep
+-   **Getters and Setters**: Often expose internals unnecessarily - prefer fewer, more meaningful operations
+
+### Error Handling
+
+-   Define errors out of existence when possible
+-   Aggregate error handling rather than scattering it
+-   Mask exceptions at module boundaries when appropriate
+-   Throw exceptions upward for serious errors; handle locally when reasonable
+
+## Modification Philosophy
+
+-   When modifying code, leave it better than you found it (strategic mindset)
+-   If you make a quick tactical fix, immediately follow with strategic cleanup
+-   Don't let complexity accumulate - address it when you encounter it
+-   Refactoring isn't a separate phase - it's continuous
+
+## Before You Code
+
+1. Think about the interface first - what's the simplest API that provides necessary functionality?
+2. Write interface comments defining behavior
+3. Consider at least two different design approaches
+4. Choose the design that minimizes complexity and maximizes maintainability
+5. Only then implement
+
+## Questions to Ask During Code Review
+
+-   Is this module deep or shallow?
+-   What information is hidden? What's exposed?
+-   Is this the right interface, or does it leak implementation details?
+-   Are comments adding information beyond the code?
+-   Is the naming clear and consistent?
+-   Is this code obvious? If not, why not?
+-   Could this be simpler?
+-   Does this add cognitive load unnecessarily?
+-   Are there red flags present?
+
+---
+
+Remember: Complexity is the enemy. Every line of code, every interface decision, every abstraction should be evaluated through the lens of "does this reduce or increase overall system complexity?"
